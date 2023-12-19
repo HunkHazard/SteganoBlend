@@ -1,9 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Logo from "../assets/logo.png";
 
 const Navbar = () => {
     return (
-        <div className="navbar bg-slate-700 h-[8vh] text-white">
+        <div className="navbar bg-[#042249] h-[8vh] text-white rounded-b-lg drop-shadow-lg">
             <div className="navbar-start">
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -45,28 +46,36 @@ const Navbar = () => {
                         </li>
                     </ul>
                 </div>
-                <Link className="btn btn-ghost text-xl">daisyUI</Link>
+                <Link className="text-xl font-normal font-poppins flex">
+                    <img src={Logo} alt="logo" className="h-8 w-8 inline-block mx-4" />
+                    SteganoBlend
+                </Link>
             </div>
             <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1">
-                    <li>
-                        <Link>Embed text in Image</Link>
+                <ul className="menu menu-horizontal px-1 text-white text-md font-poppins font-normal">
+                    <li className="mr-2">
+                        <Link >Embed text in Image</Link>
                     </li>
 
-                    <li>
+                    <li className="mr-2">
                         <Link>Embed Image in Image</Link>
                     </li>
-                    <li>
+                    <li className="mr-2">
                         <Link>Decode Text from Image</Link>
                     </li>
 
-                    <li>
+                    <li className="mr-2">
                         <Link>Decode Image from Image</Link>
                     </li>
+                </ul>
+            </div>
+            <div className="navbar-end">
+                <ul className="menu menu-horizontal px-1 text-md font-bold">
                     <li>
                         <Link>Settings</Link>
                     </li>
                 </ul>
+                <a className="btn btn-outline btn-info">Sign In</a>
             </div>
         </div>
     );

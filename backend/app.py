@@ -4,6 +4,8 @@ import backend.utils as utils
 app = Flask(__name__)
 
 
+
+
 @app.route('/api/encode', methods=['POST'])
 def api_encode():
     print("[HIT] /api/encode")
@@ -24,6 +26,8 @@ def api_decode():
     image = utils.fileToImage(request.files['image'])
 
     return jsonify({'status': 'success', 'message': 'Message decoded successfully'})
+
+
 
 
 if __name__ == '__main__':
