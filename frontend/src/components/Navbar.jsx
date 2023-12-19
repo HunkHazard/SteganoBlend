@@ -52,25 +52,25 @@ const Navbar = () => {
                 </Link>
             </div>
             <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1 text-white text-md font-poppins font-normal">
-                    <li className="mr-2">
+                <ul className="menu menu-horizontal px-1 text-white text-md font-bold">
+                    <li className="mr-2 hover:text-[#1494ff] ">
                         <Link >Embed text in Image</Link>
                     </li>
 
-                    <li className="mr-2">
+                    <li className="mr-2 hover:text-[#1494ff]">
                         <Link>Embed Image in Image</Link>
                     </li>
-                    <li className="mr-2">
+                    <li className="mr-2 hover:text-[#1494ff]">
                         <Link>Decode Text from Image</Link>
                     </li>
 
-                    <li className="mr-2">
+                    <li className="mr-2 hover:text-[#1494ff]">
                         <Link>Decode Image from Image</Link>
                     </li>
                 </ul>
             </div>
             <div className="navbar-end">
-                <ul className="menu menu-horizontal px-1 text-md font-bold">
+                <ul className="menu menu-horizontal px-1 text-md font-bold hover:text-[#1494ff]">
                     <li>
                         <Link>Settings</Link>
                     </li>

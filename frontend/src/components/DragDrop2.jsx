@@ -16,11 +16,11 @@ const FileUpload = () => {
                 className={classNames({
                     "w-[70%] h-[20rem]": true,
                     "p-4 grid place-content-center cursor-pointer": true,
-                    "text-[#1494ff] rounded-lg": true,
+                    "text-[#ac51e0] rounded-lg": true,
                     "border-4 border-dashed ": true,
                     "transition-colors": true,
-                    "border-[#1494ff] bg-[#a7c9e7]": shouldHighlight,
-                    "border-[#a7c9e7] bg-[#e2eaf1]": !shouldHighlight,
+                    "border-[#af5cdf] bg-[#d0a7e7]": shouldHighlight,
+                    "border-[#d0a7e7] bg-[#eee2f1]": !shouldHighlight,
                 })}
                 onDragOver={(e) => {
                     preventDefaultHandler(e);
@@ -56,11 +56,11 @@ const FileUpload = () => {
                                 return <span key={i}>{file.name}</span>;
                             })}
                             <div className="flex gap-2 mt-2">
-                                <button className="bg-blue-500 text-violet-50 px-2 py-1 rounded-md">
+                                <button className="bg-violet-500 text-violet-50 px-2 py-1 rounded-md">
                                     Upload
                                 </button>
                                 <button
-                                    className="border border-blue-500 px-2 py-1 rounded-md"
+                                    className="border border-violet-500 px-2 py-1 rounded-md"
                                     onClick={() => {
                                         setFileList(null);
                                     }}
