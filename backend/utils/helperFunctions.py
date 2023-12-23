@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import string
 from cryptography.fernet import Fernet
+import os
 
 
 def displayImage(image, label='Image'):
@@ -29,10 +30,13 @@ def resizeImage(original_image, image_to_hide):
         return image_to_hide
     else:
         return cv2.resize(image_to_hide, (original_image.shape[1], original_image.shape[0]))
-    
+
 # Function to check if the text contains only English alphabets, digits, and common punctuation
+
+
 def is_valid_text(text):
-    valid_characters = string.ascii_letters + string.digits + string.punctuation + ' '
+    valid_characters = string.ascii_letters + \
+        string.digits + string.punctuation + ' '
     return all(char in valid_characters for char in text)
 
 
@@ -41,9 +45,12 @@ def text_to_binary(text):
     binary_text = ''.join(format(ord(char), '08b') for char in text)
     return binary_text
 
+
 def binary_to_text(binary):
-    text = ''.join(chr(int(binary[i:i+8], 2)) for i in range(0, len(binary), 8))
+    text = ''.join(chr(int(binary[i:i+8], 2))
+                   for i in range(0, len(binary), 8))
     return text
+
 
 def decrypt_message(encrypted_message, key):
     try:
@@ -53,12 +60,24 @@ def decrypt_message(encrypted_message, key):
         return "Decryption failed: Invalid key or corrupted data"
 
 # Encryption and Decryption
+
+
 def generate_key():
     return Fernet.generate_key()
+
 
 def encrypt_message(message, key):
     f = Fernet(key)
     return f.encrypt(message.encode())
+
+
+def saveImage(image, filename):
+
+    # Check if the directory exists
+    if not os.path.exists('static/'):
+        os.makedirs('static/')
+
+    cv2.imwrite('static/' + filename, image)
 
 
 def hide_text_in_image(image, text_to_hide, bit_shift=1):
@@ -74,10 +93,12 @@ def hide_text_in_image(image, text_to_hide, bit_shift=1):
             pixel = list(image.getpixel((x, y)))
             for c in range(3):
                 if pixel_index < len(binary_text):
-                    pixel[c] = pixel[c] & ~(1 << bit_shift) | (int(binary_text[pixel_index]) << bit_shift)
+                    pixel[c] = pixel[c] & ~(1 << bit_shift) | (
+                        int(binary_text[pixel_index]) << bit_shift)
                     pixel_index += 1
             image.putpixel((x, y), tuple(pixel))
     return image
+
 
 def retrieve_text_from_image(image, bit_shift=1):
     binary_text = ''
