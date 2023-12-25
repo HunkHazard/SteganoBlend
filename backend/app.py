@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 from utils.helperFunctions import fileToImage, determineImageType, displayImage, resizeImage
-from algorithms.encode import multipleBitEncryption, multipleBitDecryption, randomAlgorithmEncryption, randomAlgorithmDecryption
+from algorithms.encode import multipleBitEncryption, multipleBitDecryption
 from algorithms.randomizer import encryptImage, decryptImage
 # from algorithms.decode import multipleBitDecryption
-from utils.helperFunctions import determineImageType, imageToFile, saveImage
+from utils.helperFunctions import determineImageType, imageToFile, saveImage, createClientFile
 import base64
 
 import cv2
@@ -21,8 +21,12 @@ def api_encode():
     if 'hidden' not in request.files:
         return jsonify({'status': 'error', 'message': 'Hidden Image not uploaded'})
 
+    if 'bits' not in request.form:
+        return jsonify({'status': 'error', 'message': 'Bits not uploaded'})
+
     original_image = fileToImage(request.files['original'])
     hidden_image = fileToImage(request.files['hidden'])
+    bits = int(request.form['bits'])
 
     print(original_image.shape)
     print(hidden_image.shape)
@@ -32,19 +36,15 @@ def api_encode():
     print(original_image.shape)
     print(hidden_image.shape)
 
-    # Resize the hidden image to fit the original image
-
-    displayImage(original_image, 'original_image')
-    displayImage(hidden_image, 'hidden_image')
-
     # Encode the message into the image
-    encoded_image = multipleBitEncryption(original_image, hidden_image, 1)
-    displayImage(encoded_image, 'encoded_image')
+    encoded_image = multipleBitEncryption(original_image, hidden_image, bits)
 
-    decoded_image = multipleBitDecryption(encoded_image, 1)
-    displayImage(decoded_image, 'decoded_image')
+    # for testing purpose; to be removed
+    saveImage(encoded_image, 'encoded_image.png')
 
-    return jsonify({'status': 'success', 'message': 'Image encoded successfully'})
+    img_file = createClientFile(encoded_image)
+
+    return jsonify({'status': 'success', 'message': 'Image encoded successfully', 'encoded_image': img_file})
 
 
 @app.route('/api/randomAlgoEncrypt', methods=['POST'])
@@ -70,8 +70,7 @@ def api_randomAlgo():
     # for testing purpose; to be removed
     saveImage(encrypted_image, 'encrypted_image.png')
 
-    img_file = imageToFile(encrypted_image)
-    img_file = base64.b64encode(img_file).decode('utf-8')
+    img_file = createClientFile(encrypted_image)
 
     # send back the encrypted image and the encrypted order
     # encrypted order is a json string
@@ -113,7 +112,20 @@ def api_decode():
         return jsonify({'status': 'error', 'message': 'No image uploaded'})
     image = fileToImage(request.files['image'])
 
-    return jsonify({'status': 'success', 'message': 'Message decoded successfully'})
+    if 'bits' not in request.form:
+        return jsonify({'status': 'error', 'message': 'No bits uploaded'})
+
+    bits = int(request.form['bits'])
+
+    # Decode the message from the image
+    decoded_image = multipleBitDecryption(image, bits)
+
+    # for testing purpose; to be removed
+    saveImage(decoded_image, 'decoded_image.png')
+
+    img_file = createClientFile(decoded_image)
+
+    return jsonify({'status': 'success', 'message': 'Image decoded successfully', 'decoded_image': img_file})
 
 
 if __name__ == '__main__':

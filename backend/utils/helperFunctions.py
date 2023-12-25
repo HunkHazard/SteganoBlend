@@ -1,6 +1,11 @@
+import base64
+import string
+from skimage.feature import match_template
+from skimage.metrics import mean_squared_error as mse
+import matplotlib.pyplot as plt
+from skimage.metrics import peak_signal_noise_ratio as psnr
 import cv2
 import numpy as np
-import string
 from cryptography.fernet import Fernet
 import os
 
@@ -30,12 +35,16 @@ def determineImageType(image):
 
 
 def resizeImage(original_image, image_to_hide):
-    if original_image.shape[0] > image_to_hide.shape[0] and original_image.shape[1] > image_to_hide.shape[1]:
-        return image_to_hide
-    else:
-        return cv2.resize(image_to_hide, (original_image.shape[1], original_image.shape[0]))
+    return cv2.resize(image_to_hide, (original_image.shape[1], original_image.shape[0]))
 
 # Function to check if the text contains only English alphabets, digits, and common punctuation
+
+
+def createClientFile(image):
+    img_file = imageToFile(image)
+    img_file = base64.b64encode(img_file).decode('utf-8')
+
+    return img_file
 
 
 def is_valid_text(text):
@@ -117,3 +126,32 @@ def retrieve_text_from_image(image, bit_shift=1):
                     if binary_text[-8:] == '00000000':
                         return binary_to_text(binary_text[:-8])
     return binary_to_text(binary_text)
+
+
+def typeChecker(img):
+    if len(img.shape) == 2:
+        return True  # grayscale
+    else:
+        return False  # color
+
+
+def calculate_psnr(img1, img2):
+    return psnr(img1, img2)
+
+
+def plot_histogram(image, title):
+    color = ('b', 'g', 'r')
+    for i, col in enumerate(color):
+        histr = cv2.calcHist([image], [i], None, [256], [0, 256])
+        plt.plot(histr, color=col)
+        plt.xlim([0, 256])
+    plt.title(title)
+    plt.show()
+
+
+def calculate_mse(img1, img2):
+    return mse(img1, img2)
+
+
+def calculate_ncc(img1, img2):
+    return match_template(img1, img2).max()

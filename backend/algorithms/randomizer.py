@@ -1,8 +1,3 @@
-from skimage.feature import match_template
-from skimage.metrics import mean_squared_error as mse
-import matplotlib.pyplot as plt
-from skimage.metrics import structural_similarity as ssim
-from skimage.metrics import peak_signal_noise_ratio as psnr
 import cv2
 import numpy as np
 from cryptography.fernet import Fernet
@@ -10,16 +5,11 @@ import os
 
 
 seq = 32  # length of sequence
-
-
-def display(img, title='Image'):
-    cv2.imshow(title, img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+# increasing this will add thicker lines to the decrypted image
 
 
 def generateSequence(bits=3):
-    # a numpy array of length 5 random integers between 1 and bits
+    # would be better if generate these ourselves instead of using this function
     sequence = np.random.randint(1, bits, size=(seq,))
     return sequence
 
@@ -44,11 +34,8 @@ def channelEncrypt(channel, hidden_channel, random_bit_shift):
 def channelDecrypt(channel, random_bit_shift):
     for i in range(channel.shape[0]):
         for j in range(channel.shape[1]):
-            encrypted_pixel = channel[i, j]
-            decrypted_pixel = encrypted_pixel.copy()
-            decrypted_pixel <<= (8 - random_bit_shift[j % seq])
-
-            channel[i, j] = decrypted_pixel
+            channel[i, j] = decryptPixel(
+                channel[i, j], random_bit_shift[j % seq])
 
     return channel
 
@@ -59,12 +46,16 @@ def encryptPixel(original_pixel, hidden_pixel, bit_shift):
     encrypted_pixel <<= bit_shift
     hidden_pixel >>= (8 - bit_shift)
     encrypted_pixel |= hidden_pixel
+
     return encrypted_pixel
 
 
 def decryptPixel(encrypted_pixel, bit_shift):
     decrypted_pixel = encrypted_pixel.copy()
     decrypted_pixel <<= (8 - bit_shift)
+
+    decrypted_pixel &= 0b10000000  # QUICK FIX FOR VERTICAL LINE ISSUE
+
     return decrypted_pixel
 
 
@@ -96,6 +87,8 @@ def decryptImage(encrypted_img, sequence):
     for i in range(3):
         channelDecrypt(decrypted_img[:, :, i], sequence)
 
+    saveImage(decrypted_img, 'decrypted_image_inter.jpg')
+
     decrypted_img = cv2.resize(
         decrypted_img, (dimensions[1], dimensions[0]))
 
@@ -114,35 +107,6 @@ def saveImage(img, filename):
 
     filename = os.path.join('static', filename)
     cv2.imwrite(filename, img)
-
-
-def typeChecker(img):
-    if len(img.shape) == 2:
-        return True  # grayscale
-    else:
-        return False  # color
-
-
-def calculate_psnr(img1, img2):
-    return psnr(img1, img2)
-
-
-def plot_histogram(image, title):
-    color = ('b', 'g', 'r')
-    for i, col in enumerate(color):
-        histr = cv2.calcHist([image], [i], None, [256], [0, 256])
-        plt.plot(histr, color=col)
-        plt.xlim([0, 256])
-    plt.title(title)
-    plt.show()
-
-
-def calculate_mse(img1, img2):
-    return mse(img1, img2)
-
-
-def calculate_ncc(img1, img2):
-    return match_template(img1, img2).max()
 
 
 def encryptSequence(sequence):
@@ -173,37 +137,3 @@ def decryptSequence(encrypted_sequence):
     # print(decrypted_sequence)
 
     return decrypted_sequence
-
-
-def main():
-    # bits = 2
-    # original_img = cv2.imread('original.jpg')
-    # secret_img = cv2.imread('car.jpeg')
-
-    # # display(original_img, 'Original')
-    # # display(secret_img, 'Secret')
-
-    # # plot_histogram(original_img, 'Original')
-
-    # encrypted_img, sequence = encryptImage(original_img, secret_img, bits=bits)
-    # # display(encrypted_img, 'Encrypted')
-    # # plot_histogram(encrypted_img, 'Encrypted')
-
-    # encrypted_img, sequence = encryptImage(original_img, secret_img, bits=bits)
-    # print("PSNR: ", calculate_psnr(original_img, encrypted_img))
-    # print("MSE: ", calculate_mse(original_img, encrypted_img))
-    # print("NCC: ", calculate_ncc(original_img, encrypted_img))
-
-    # decrypted_img = decryptImage(encrypted_img, sequence)
-    # # display(decrypted_img, 'Decrypted')
-
-    sequence = generateSequence()
-    print(sequence)
-    encrypted_sequence = encryptSequence(sequence)
-    print(encrypted_sequence)
-    decrypted_sequence = decryptSequence(encrypted_sequence)
-    print(decrypted_sequence)
-
-
-# if __name__ == '__main__':
-#     main()
