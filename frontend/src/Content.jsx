@@ -7,7 +7,7 @@ export default function AppContent() {
     return (
         <>
             <div
-                className="flex justify-center items-center h-[92vh]"
+                className="flex justify-center items-center h-[90vh]"
             >
                 <Routes>
                     <Route key={"textInImage"} path={"/text-in-image"} element={<TinI />} />

@@ -17,25 +17,25 @@ const Home = () => {
                 <p className="text-2xl font-bold font-poppins mt-12 w-[70%] text-center">
                     Our most famous tools
                 </p>
-                <div className="grid grid-rows-2 grid-flow-col gap-4 mt-4">
+                <div className="grid grid-rows-2 grid-flow-col gap-4 mt-4 font-poppins">
                     <div className="card w-[20rem] bg-base-100 shadow-xl">
                         <div className="card-body">
-                            <p>If a dog chews shoes whose shoes does he choose?</p>
+                            <p>Embed Text into image</p>
                         </div>
                     </div>
                     <div className="card w-[20rem] bg-base-100 shadow-xl">
                         <div className="card-body">
-                            <p>If a dog chews shoes whose shoes does he choose?</p>
+                            <p>Embed Image into Image</p>
                         </div>
                     </div>
                     <div className="card w-[20rem] bg-base-100 shadow-xl">
                         <div className="card-body">
-                            <p>If a dog chews shoes whose shoes does he choose?</p>
+                            <p>De-embed Text from Image</p>
                         </div>
                     </div>
                     <div className="card w-[20rem] bg-base-100 shadow-xl">
                         <div className="card-body">
-                            <p>If a dog chews shoes whose shoes does he choose?</p>
+                            <p>De-embed Image from Image</p>
                         </div>
                     </div>
 

@@ -6,6 +6,8 @@ module.exports = {
       fontFamily: {
         roboto: ["Roboto", "sans-serif"],
         poppins: ["Poppins", "sans-serif"],
+        worksans: ["Work Sans", "sans-serif"],
+        monteserrat: ["Montserrat", "sans-serif"],
       },
     },
   },

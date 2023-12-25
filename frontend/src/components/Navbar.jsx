@@ -4,7 +4,7 @@ import Logo from "../assets/logo.png";
 
 const Navbar = () => {
     return (
-        <div className="navbar bg-[#042249] h-[8vh] text-white rounded-b-lg drop-shadow-lg">
+        <div className="navbar bg-[#042249] h-[10vh] text-white drop-shadow-lg">
             <div className="navbar-start">
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -46,36 +46,34 @@ const Navbar = () => {
                         </li>
                     </ul>
                 </div>
-                <Link className="text-xl font-normal font-poppins flex">
-                    <img src={Logo} alt="logo" className="h-8 w-8 inline-block mx-4" />
+                <Link to={"/"} className="text-2xl font-normal font-poppins flex text-white justify-center items-center ml-[2rem]">
+                    <img src={Logo} alt="logo" className="w-[3.5rem] h-[3.5rem] mr-[1rem]" />
                     SteganoBlend
                 </Link>
             </div>
-            <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1 text-white text-md font-bold">
+            <div className="navbar-end hidden lg:flex">
+                <ul className="menu menu-horizontal px-1 text-white font-poppins text-lg font-bold">
+                    <li className="mr-2 hover:text-[#1494ff]">
+                        <Link to={"/"} >Home</Link>
+                    </li>
                     <li className="mr-2 hover:text-[#1494ff] ">
-                        <Link >Embed text in Image</Link>
+                        <Link >Tools</Link>
                     </li>
 
                     <li className="mr-2 hover:text-[#1494ff]">
-                        <Link>Embed Image in Image</Link>
+                        <Link >About</Link>
                     </li>
                     <li className="mr-2 hover:text-[#1494ff]">
-                        <Link>Decode Text from Image</Link>
-                    </li>
-
-                    <li className="mr-2 hover:text-[#1494ff]">
-                        <Link>Decode Image from Image</Link>
+                        <Link>Contact us</Link>
                     </li>
                 </ul>
-            </div>
-            <div className="navbar-end">
-                <ul className="menu menu-horizontal px-1 text-md font-bold hover:text-[#1494ff]">
-                    <li>
-                        <Link>Settings</Link>
-                    </li>
-                </ul>
-                <a className="btn btn-outline btn-info">Sign In</a>
+                <div className="flex">
+                    <a href="#" className="rounded-full bg-[#e1f2f5] text-[#245870] font-poppins font-bold w-[5rem] flex justify-center items-center mx-[2rem] hover:bg-[#cfe4e9] active:bg-[#b7d3dc] transition duration-300 ease-in-out">
+                        Start
+                    </a> <a href="#" className="rounded-full bg-[#1494ff] text-white font-poppins font-bold w-[6rem] h-[2.5rem] justify-center items-center flex mr-[2rem] hover:bg-[#318a96] active:bg-[#2c7c85] transition duration-400 ease-in-out">
+                        Sign In
+                    </a>
+                </div>
             </div>
         </div>
     );
