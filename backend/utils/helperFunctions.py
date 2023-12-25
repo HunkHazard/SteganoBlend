@@ -16,6 +16,10 @@ def fileToImage(file):
     return cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
 
 
+def imageToFile(image):
+    return cv2.imencode('.png', image)[1].tobytes()
+
+
 def determineImageType(image):
     if len(image.shape) == 2:
         return 'grayscale'

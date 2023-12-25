@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 from utils.helperFunctions import fileToImage, determineImageType, displayImage, resizeImage
 from algorithms.encode import multipleBitEncryption, multipleBitDecryption, randomAlgorithmEncryption, randomAlgorithmDecryption
+from algorithms.randomizer import encryptImage, decryptImage
 # from algorithms.decode import multipleBitDecryption
-from utils.helperFunctions import determineImageType, displayImage
+from utils.helperFunctions import determineImageType, imageToFile, saveImage
+import base64
 
 import cv2
 
@@ -61,16 +63,20 @@ def api_randomAlgo():
     # print(original_image.shape)
     # print(hidden_image.shape)
 
-    hidden_image = resizeImage(original_image, hidden_image)
+    # bits is max 8 i.e. max no of bits to be used for encryption
+    encrypted_image, encrypted_order = encryptImage(
+        original_image, hidden_image, bits=3)
 
-    encrypted_image, encrypted_order, key = randomAlgorithmEncryption(
-        original_image=original_image, image_to_hide=hidden_image)
+    # for testing purpose; to be removed
+    saveImage(encrypted_image, 'encrypted_image.png')
 
-    # convert the encrypted order which is bytes to json
-    encrypted_order = encrypted_order.decode('utf-8')
-    key = key.decode('utf-8')
+    img_file = imageToFile(encrypted_image)
+    img_file = base64.b64encode(img_file).decode('utf-8')
 
-    return jsonify({'status': 'success', 'message': 'Image encoded successfully', 'encrypted_order': encrypted_order, 'key': key})
+    # send back the encrypted image and the encrypted order
+    # encrypted order is a json string
+
+    return jsonify({'status': 'success', 'message': 'Image encoded successfully', 'encrypted_image': img_file, 'encrypted_order': encrypted_order})
 
 
 @app.route('/api/randomAlgoDecrypt', methods=['POST'])
@@ -83,23 +89,20 @@ def api_randomAlgoDecrypt():
     if 'encrypted_order' not in request.form:
         return jsonify({'status': 'error', 'message': 'Encrypted Order not uploaded'})
 
-    if 'key' not in request.form:
-        return jsonify({'status': 'error', 'message': 'Key not uploaded'})
-
     encrypted_image = fileToImage(request.files['encrypted_image'])
     encrypted_order = request.form['encrypted_order']
-    key = request.form['key']
-    print(encrypted_order)
 
     # convert the encrypted order which is json to bytes
 
-    encrypted_order = encrypted_order.encode('utf-8')
-    key = key.encode('utf-8')
+    decrypted_img = decryptImage(encrypted_image, encrypted_order)
 
-    decrypted_order = randomAlgorithmDecryption(
-        encrypted_image=encrypted_image, encrypted_order=encrypted_order, key=key)
+    # for testing purpose; to be removed
+    saveImage(decrypted_img, 'decrypted_image.png')
 
-    return jsonify({'status': 'success', 'message': 'Image decoded successfully', 'decrypted_order': decrypted_order})
+    img_file = imageToFile(decrypted_img)
+    img_file = base64.b64encode(img_file).decode('utf-8')
+
+    return jsonify({'status': 'success', 'message': 'Image decoded successfully', 'decrypted_image': img_file})
 
 
 @app.route('/api/decode', methods=['POST'])

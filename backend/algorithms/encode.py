@@ -1,3 +1,4 @@
+import hashlib
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -153,22 +154,45 @@ def decryptOrder(encrypted_order, key):
     return decrypted_order
 
 
+def encrypt_pixel(original_pixel, hidden_pixel, random_bit_shift):
+    encrypted_pixel = original_pixel.copy()
+    encrypted_pixel >>= random_bit_shift
+    encrypted_pixel <<= random_bit_shift
+    hidden_pixel >>= (8 - random_bit_shift)
+    encrypted_pixel |= hidden_pixel
+    return encrypted_pixel
+
+
+def encrypt_channel(original_channel, hidden_channel, random_bit_shift):
+    encrypted_channel = original_channel.copy()
+    for i in range(original_channel.shape[0]):
+        for j in range(original_channel.shape[1]):
+            encrypted_channel[i, j] = encrypt_pixel(
+                original_channel[i, j], hidden_channel[i, j], random_bit_shift[i, j])
+    return encrypted_channel
+
+
 def encryptImage(original_image, image_to_hide, random_bit_shifts):
     encrypted_image = original_image.copy()
+
+    print("encryptImage reached")
+    print(original_image.shape)
+    print(image_to_hide.shape)
+    print(random_bit_shifts.shape)
+
     if determineImageType(original_image) == 'grayscale':
         for i in range(original_image.shape[0]):
             for j in range(original_image.shape[1]):
-                encrypted_image[i, j] = apply_encryption(
+                encrypted_image[i, j] = encrypt_pixel(
                     original_image[i, j], image_to_hide[i, j], random_bit_shifts[i, j])
 
     elif determineImageType(original_image) == 'bgr' or determineImageType(original_image) == 'rgb':
         for i in range(original_image.shape[2]):
-            encrypted_image[i, j] = apply_encryption(
-                original_image[i, j], image_to_hide[i, j], random_bit_shifts[i, j])
+            encrypted_image[:, :, i] = encrypt_channel(
+                original_image[:, :, i], image_to_hide[:, :, i], random_bit_shifts[:, :, i])
     else:
         raise ValueError("Unsupported image type")
 
-    saveImage(encrypted_image, 'encrypted_image')
     return encrypted_image
 
 
@@ -190,29 +214,68 @@ def decryptImage(encrypted_image, decrypted_order):
     return decrypted_image
 
 
-def randomAlgorithmEncryption(original_image, image_to_hide):
-    key = generate_key()
+def derive_short_key(sequence_string, key):
+    # Use a KDF (e.g., SHA-256) to derive a fixed-size key
+    short_key = hashlib.sha256((key + sequence_string).encode()).digest()
+    return short_key
 
+
+def generateRandomBitShifts(shape, key):
+    # Combine the key with the shape to create a unique seed
+    seed = key + str(shape)
+
+    # Use a cryptographic hash function to generate a seed for the random number generator
+    seed = hashlib.sha256(seed.encode()).hexdigest()
+
+    # Seed the random number generator
+    np.random.seed(int(seed, 16))
+
+    # Generate random bit shifts
+    random_bit_shifts = np.random.randint(1, 4, size=shape)
+
+    # Convert the 2D array to a flattened 1D array
+    flat_shifts = random_bit_shifts.flatten()
+
+    # Convert each shift value to a hexadecimal string and concatenate
+    sequence_string = ''.join(format(shift, 'X') for shift in flat_shifts)
+
+    return random_bit_shifts, sequence_string
+
+
+def randomAlgorithmEncryption(original_image, image_to_hide):
+
+    print("[Generating Key]")
+    key = generate_key()
+    key = key.decode('utf-8')
+    print("[Key Generated]")
+
+    print("[Generating Random Bit Shifts]")
     random_bit_shifts, sequence_string = generateRandomBitShifts(
-        original_image.shape)
+        original_image.shape, key)
+    print("[Random Bit Shifts Generated]")
+
+    print("[Deriving Short Key]")
+    short_key = derive_short_key(sequence_string, key)
+    print("[Short Key Derived]")
+
+    print("[Encrypting Order]")
     encrypted_order = encryptOrder(sequence_string, key)
+    print("[Order Encrypted]")
 
     print("Encrypting Image")
     encrypted_image = encryptImage(
         original_image, image_to_hide, random_bit_shifts)
     print("Image Encrypted")
 
-    saveImage(encrypted_image, 'decrypted_image')
+    saveImage(encrypted_image, 'encrypted_image.jpg')
 
-    return encrypted_image, encrypted_order, key
+    return encrypted_image, encrypted_order, short_key
 
 
 def randomAlgorithmDecryption(encrypted_image, encrypted_order, key):
     sequence_string = decryptOrder(encrypted_order, key)
-    decrypted_order = np.zeros(encrypted_image.shape)
-    for i in range(encrypted_image.shape[0]):
-        for j in range(encrypted_image.shape[1]):
-            decrypted_order[i, j] = int(sequence_string[i * j])
+    decrypted_order = np.array(list(sequence_string)).reshape(
+        encrypted_image.shape[0], encrypted_image.shape[1]).astype(int)
 
     print("Decrypting Image")
     decrypted_image = decryptImage(encrypted_image, decrypted_order)
