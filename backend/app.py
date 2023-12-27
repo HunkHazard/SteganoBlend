@@ -11,6 +11,8 @@ import cv2
 app = Flask(__name__)
 
 
+
+
 @app.route('/api/encode', methods=['POST'])
 def api_encode():
     print("[HIT] /api/encode")
@@ -130,6 +132,8 @@ def api_decode():
     img_file = createClientFile(decoded_image)
 
     return jsonify({'status': 'success', 'message': 'Image decoded successfully', 'decoded_image': img_file})
+
+
 
 
 if __name__ == '__main__':
