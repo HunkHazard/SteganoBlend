@@ -72,13 +72,14 @@ def encryptImage(original_img, secret_img, bits=3):
                        secret_img[:, :, i], random_bit_shift)
 
     sequence = addDimensionToSequence(random_bit_shift, dimensions)
-    sequence = encryptSequence(sequence)
+    sequence, key = encryptSequence(sequence)
 
-    return encrypted_img, sequence
+    return encrypted_img, sequence, key
 
 
-def decryptImage(encrypted_img, sequence):
-    sequence = decryptSequence(sequence)
+def decryptImage(encrypted_img, sequence, key):
+
+    sequence = decryptSequence(sequence, key)
 
     dimensions = (sequence[-2], sequence[-1])
     sequence = sequence[:-2]
@@ -113,7 +114,8 @@ def encryptSequence(sequence):
     sequence = sequence.tobytes()
 
     # will move this to .env file later
-    secret_pass = b'jBeyakSKKnW-ebH2MKuk7JQ5rj0uU2WnvqZ6csfmPDo='
+    # secret_pass = b'jBeyakSKKnW-ebH2MKuk7JQ5rj0uU2WnvqZ6csfmPDo='
+    secret_pass = Fernet.generate_key()
     f = Fernet(secret_pass)
 
     encrypted_sequence = f.encrypt(sequence)
@@ -121,13 +123,15 @@ def encryptSequence(sequence):
 
     # convert from bytes to string (this will be sent back to the client)
     encrypted_sequence = encrypted_sequence.decode('utf-8')
+    key = secret_pass.decode('utf-8')
     # print(encrypted_sequence)
 
-    return encrypted_sequence
+    return encrypted_sequence, key
 
 
-def decryptSequence(encrypted_sequence):
-    secret_pass = b'jBeyakSKKnW-ebH2MKuk7JQ5rj0uU2WnvqZ6csfmPDo='
+def decryptSequence(encrypted_sequence, key):
+    # secret_pass = b'jBeyakSKKnW-ebH2MKuk7JQ5rj0uU2WnvqZ6csfmPDo='
+    secret_pass = key.encode("utf-8")
     f = Fernet(secret_pass)
 
     decrypted_sequence = f.decrypt(encrypted_sequence)

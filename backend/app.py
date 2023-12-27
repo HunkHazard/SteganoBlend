@@ -64,7 +64,7 @@ def api_randomAlgo():
     # print(hidden_image.shape)
 
     # bits is max 8 i.e. max no of bits to be used for encryption
-    encrypted_image, encrypted_order = encryptImage(
+    encrypted_image, encrypted_order, key = encryptImage(
         original_image, hidden_image, bits=3)
 
     # for testing purpose; to be removed
@@ -75,7 +75,7 @@ def api_randomAlgo():
     # send back the encrypted image and the encrypted order
     # encrypted order is a json string
 
-    return jsonify({'status': 'success', 'message': 'Image encoded successfully', 'encrypted_image': img_file, 'encrypted_order': encrypted_order})
+    return jsonify({'status': 'success', 'message': 'Image encoded successfully', 'encrypted_image': img_file, 'encrypted_order': encrypted_order, 'key': key})
 
 
 @app.route('/api/randomAlgoDecrypt', methods=['POST'])
@@ -88,12 +88,16 @@ def api_randomAlgoDecrypt():
     if 'encrypted_order' not in request.form:
         return jsonify({'status': 'error', 'message': 'Encrypted Order not uploaded'})
 
+    if 'key' not in request.form:
+        return jsonify({'status': 'error', 'message': 'Key not uploaded'})
+
     encrypted_image = fileToImage(request.files['encrypted_image'])
     encrypted_order = request.form['encrypted_order']
+    key = request.form['key']
 
     # convert the encrypted order which is json to bytes
 
-    decrypted_img = decryptImage(encrypted_image, encrypted_order)
+    decrypted_img = decryptImage(encrypted_image, encrypted_order, key)
 
     # for testing purpose; to be removed
     saveImage(decrypted_img, 'decrypted_image.png')
