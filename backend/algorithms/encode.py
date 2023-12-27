@@ -43,6 +43,7 @@ def multipleBitDecryption(encrypted_image, bit_shift):
 def multiBitTextEncryption(cover_image, text_to_hide, bit_shift, stop_character='\0'):
     binary_text = text_to_binary(text_to_hide) + text_to_binary(stop_character)
 
+    bit_shift = int(bit_shift)
     width, height = cover_image.size
 
     # Check if the text is too long for the image
