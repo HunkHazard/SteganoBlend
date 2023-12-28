@@ -374,6 +374,7 @@ class pvd_lib:
                                 if (bits_writer.bytes_wrote_to_file_so_far >= (PVD_HEADER_SIZE)) and magic_extracted == False:
                                     magic_extracted = True
                                     magic = bits_writer.data[:PVD_HEADER_SIZE]
+                                    
                                     pvd_magic = magic[:4]
                                     pvd_versn = magic[4:7]
                                     """ Check if the magic and version are matching """

@@ -42,26 +42,50 @@ const Text_in_image = () => {
             formData.append('bitShift', BitShift);
         }
 
+        if (Technique === "multi-bit" || Technique === "encryption") {
 
-        try {
-            const response = await fetch('http://localhost:5000/text-image-encrypt', {
-                method: 'POST',
-                body: formData, // Sending the FormData object
-            });
+            try {
+                const response = await fetch('http://localhost:5000/text-image-encrypt', {
+                    method: 'POST',
+                    body: formData, // Sending the FormData object
+                });
 
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                if (jsonResponse.image) {
-                    setKey(jsonResponse.key)
-                    setProcessedImageData(jsonResponse.image);
+                if (response.ok) {
+                    const jsonResponse = await response.json();
+                    if (jsonResponse.image) {
+                        setKey(jsonResponse.key)
+                        setProcessedImageData(jsonResponse.image);
+                    }
+
+                } else {
+                    // Handle HTTP errors
+                    console.error('Failed to send data', response.status);
                 }
-
-            } else {
-                // Handle HTTP errors
-                console.error('Failed to send data', response.status);
+            } catch (error) {
+                console.error('Error while sending data', error);
             }
-        } catch (error) {
-            console.error('Error while sending data', error);
+        }
+        else if (Technique === "variable") {
+            try {
+                const response = await fetch('http://localhost:5000/api/pvr-encrypt', {
+                    method: 'POST',
+                    body: formData, // Sending the FormData object
+                });
+
+                if (response.ok) {
+                    const jsonResponse = await response.json();
+                    console.log(jsonResponse)
+                    if (jsonResponse.encrypted_image) {
+                        setProcessedImageData(jsonResponse.encrypted_image);
+                    }
+
+                } else {
+                    // Handle HTTP errors
+                    console.error('Failed to send data', response.status);
+                }
+            } catch (error) {
+                console.error('Error while sending data', error);
+            }
         }
     };
     const handleDownloadClick = () => {

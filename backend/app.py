@@ -14,7 +14,7 @@ import cv2
 from flask_cors import CORS
 from algorithms.pvd_test import encryptPVD, decryptPVD
 import os
-from metrics.metrics import mse, psnr, match_template
+# from metrics.metrics import mse, psnr, match_template
 
 app = Flask(__name__)
 CORS(app)
@@ -228,9 +228,9 @@ def pvr_encrypt():
 
     # getting files
 
-    if 'original' not in request.files:
+    if 'image' not in request.files:
         return jsonify({'status': 'error', 'message': 'No image uploaded'})
-    original = fileToImage(request.files['original'])
+    original = fileToImage(request.files['image'])
 
     if 'text' not in request.form:
         return jsonify({'status': 'error', 'message': 'No text uploaded'})
@@ -271,7 +271,7 @@ def pvr_decrypt():
     if 'original' not in request.files:
         return jsonify({'status': 'error', 'message': 'No image uploaded'})
     original = fileToImage(request.files['original'])
-
+    print("Hello")
     print(original.shape)
     print(encrypted.shape)
 
