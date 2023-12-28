@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 from base64 import b64encode
 from utils.helperFunctions import fileToImage, determineImageType, displayImage, resizeImage
-from algorithms.encode import multipleBitEncryption, multipleBitDecryption,multiBitTextEncryption,keyBasedTextEncoding,keyBasedTextDecoding,multiBitTextDecryption
+from algorithms.encode import multipleBitEncryption, multipleBitDecryption, multiBitTextEncryption, keyBasedTextEncoding, keyBasedTextDecoding, multiBitTextDecryption
 from algorithms.randomizer import encryptImage, decryptImage
 # from algorithms.decode import multipleBitDecryption
 from utils.helperFunctions import determineImageType, imageToFile, saveImage, createClientFile
@@ -11,11 +11,12 @@ from PIL import Image
 import io
 import cv2
 from flask_cors import CORS
+from algorithms.pvd_test import encryptPVD, decryptPVD
+import os
+from metrics.metrics import mse, psnr, match_template
 
 app = Flask(__name__)
 CORS(app)
-
-
 
 
 @app.route('/api/encode', methods=['POST'])
@@ -147,7 +148,7 @@ def handle_data():
         return jsonify({'message': 'No text part in the request'}), 400
     if 'technique' not in request.form:
         return jsonify({'message': 'No technique part in the request'}), 400
-    
+
     image_file = request.files['image']
     text = request.form['text']
     technique = request.form['technique']
@@ -162,13 +163,13 @@ def handle_data():
     pil_image = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
 
     if technique == 'multi-bit':
-        bit_shift = request.form.get('bitShift', 1)  # Default to 1 if not provided
+        # Default to 1 if not provided
+        bit_shift = request.form.get('bitShift', 1)
         result_image = multiBitTextEncryption(pil_image, text, int(bit_shift))
     elif technique == 'encryption':
         result_image, key = keyBasedTextEncoding(pil_image, text)
     else:
         return jsonify({'message': 'Invalid technique'}), 400
-
 
     result_image_np = np.array(result_image)
     result_image_np = cv2.cvtColor(result_image_np, cv2.COLOR_RGB2BGR)
@@ -187,7 +188,7 @@ def handle_decryption():
         return jsonify({'message': 'No image part in the request'}), 400
     if 'technique' not in request.form:
         return jsonify({'message': 'No technique part in the request'}), 400
-    
+
     image_file = request.files['image']
     technique = request.form['technique']
 
@@ -202,7 +203,8 @@ def handle_decryption():
 
     decrypted_text = ''
     if technique == 'multi-bit':
-        bit_shift = int(request.form.get('bitShift', 1))  # Default to 1 if not provided
+        # Default to 1 if not provided
+        bit_shift = int(request.form.get('bitShift', 1))
         decrypted_text = multiBitTextDecryption(pil_image, bit_shift)
     elif technique == 'encryption':
         key = request.form.get('key', '')
@@ -211,6 +213,134 @@ def handle_decryption():
         return jsonify({'message': 'Invalid technique'}), 400
 
     return jsonify({'decrypted_text': decrypted_text}), 200
+
+
+@app.route('/api/pvr-encrypt', methods=['POST'])
+def pvr_encrypt():
+    print("[HIT] /api/pvr-encrypt")
+
+    # getting files
+
+    if 'original' not in request.files:
+        return jsonify({'status': 'error', 'message': 'No image uploaded'})
+    original = fileToImage(request.files['original'])
+
+    if 'text' not in request.form:
+        return jsonify({'status': 'error', 'message': 'No text uploaded'})
+    text = request.form['text']
+
+    # save og , text
+    saveImage(original, 'original.png')
+    with open('secret.txt', 'w') as f:
+        f.write(text)
+        f.close()
+
+    # encrypt
+    encryptPVD('static/original.png', 'secret.txt', 'encrypted.png')
+
+    # load encrypted
+    encrypted = cv2.imread('encrypted.png')
+
+    # converting to a file to send back
+    encrypted = createClientFile(encrypted)
+
+    # remove the files that were saved
+    os.remove('static/original.png')
+    os.remove('secret.txt')
+    # os.remove('encrypted.png')
+
+    return jsonify({'status': 'success', 'message': 'Image encrypted successfully', 'encrypted_image': encrypted})
+
+
+@app.route('/api/pvr-decrypt', methods=['POST'])
+def pvr_decrypt():
+    print("[HIT] /api/pvr-decrypt")
+
+    # getting files
+    if 'encrypted' not in request.files:
+        return jsonify({'status': 'error', 'message': 'No image uploaded'})
+    encrypted = fileToImage(request.files['encrypted'])
+
+    if 'original' not in request.files:
+        return jsonify({'status': 'error', 'message': 'No image uploaded'})
+    original = fileToImage(request.files['original'])
+
+    print(original.shape)
+    print(encrypted.shape)
+
+    saveImage(encrypted, 'encrypted.png')
+    saveImage(original, 'original.png')
+
+    # decrypt
+    decryptPVD('static/original.png', 'decrypted.txt', 'static/encrypted.png')
+
+    # load encrypted
+    # decrypted = cv2.imread('decrypted.png')
+
+    # # converting to a file to send back
+    # decrypted = createClientFile(decrypted)
+
+    # read the decrypted text
+    with open('decrypted.txt', 'r') as f:
+        decrypted_text = f.read()
+        f.close()
+
+    # remove the files that were saved
+    os.remove('static/encrypted.png')
+    os.remove('decrypted.txt')
+    # os.remove('decrypted.png')
+    os.remove('static/original.png')
+
+    return jsonify({'status': 'success', 'message': 'Image decrypted successfully', 'decrypted_text': decrypted_text})
+
+
+@app.route('/api/metrics', methods=['POST'])
+def metrics():
+    print("[HIT] /api/metrics")
+
+    if 'original' not in request.files:
+        return jsonify({'status': 'error', 'message': 'Original Image not uploaded'})
+
+    if 'hidden' not in request.files:
+        return jsonify({'status': 'error', 'message': 'Hidden Image not uploaded'})
+
+    original_image = fileToImage(request.files['original'])
+    hidden_image = fileToImage(request.files['hidden'])
+
+    print(original_image.shape)
+    print(hidden_image.shape)
+
+    # apply different metrics to the images to see the quality of steganography
+    # 1. MSE
+    # 2. PSNR
+    # 3. SSIM
+    # 4. NCC
+
+    # 1. MSE
+    # mean squared error
+    # the lower the better
+    # 0 means no error
+
+    mse_value = mse(original_image, hidden_image)
+
+    # 2. PSNR
+    # peak signal to noise ratio
+    # the higher the better
+
+    psnr_value = psnr(original_image, hidden_image)
+
+    # 3. SSIM
+    # structural similarity index
+    # the higher the better
+
+    ssim_value = match_template(original_image, hidden_image)
+
+    # 4. NCC
+    # normalized cross correlation
+    # the higher the better
+
+    ncc_value = np.corrcoef(original_image, hidden_image)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
