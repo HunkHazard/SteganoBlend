@@ -206,28 +206,6 @@ const Image_in_image = () => {
                                         </div>
                                     </label>
                                 </li>
-                                <li>
-                                    <input
-                                        type='radio'
-                                        id='variable'
-                                        name='radio-10'
-                                        value='variable'
-                                        className='hidden peer'
-                                        required
-                                        onClick={handleTechniqueChange}
-                                    />
-                                    <label
-                                        htmlFor='variable'
-                                        className='inline-flex items-center border-2 border-slate-300 mr-4 justify-between w-[19rem] p-5 text-slate-800 bg-white rounded-lg cursor-pointer peer-checked:border-red-600 peer-checked:text-red-600 hover:text-gray-600 hover:bg-gray-100 '
-                                    >
-                                        <div className='flex'>
-                                            <img src={Variable} alt="multi" className="h-8 w-8 inline-block mr-2" />
-                                            <div className='w-full text-lg font-normal mt-0.5 ml-2'>
-                                                Variable Embedding Rate
-                                            </div>
-                                        </div>
-                                    </label>
-                                </li>
 
                             </div>
                             <div className="flex justify-center mt-10">
