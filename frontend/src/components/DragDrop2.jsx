@@ -2,14 +2,25 @@
 import React, { useState } from "react";
 import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import classNames from "classnames";
-const FileUpload = () => {
-    const [fileList, setFileList] = useState(null);
+
+const FileUpload = ({ setPicture }) => {
+    const [tempFile, setTempFile] = useState(null); // Temporary file holder
     const [shouldHighlight, setShouldHighlight] = useState(false);
 
     const preventDefaultHandler = (e) => {
         e.preventDefault();
         e.stopPropagation();
     };
+
+    const handleDrop = (e) => {
+        preventDefaultHandler(e);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            setPicture(e.dataTransfer.files[0]);
+            setTempFile(e.dataTransfer.files[0]);
+        }
+        setShouldHighlight(false);
+    };
+
     return (
         <div className="w-full mt-12 flex justify-center">
             <div
@@ -22,10 +33,7 @@ const FileUpload = () => {
                     "border-[#af5cdf] bg-[#d0a7e7]": shouldHighlight,
                     "border-[#d0a7e7] bg-[#eee2f1]": !shouldHighlight,
                 })}
-                onDragOver={(e) => {
-                    preventDefaultHandler(e);
-                    setShouldHighlight(true);
-                }}
+                onDragOver={preventDefaultHandler}
                 onDragEnter={(e) => {
                     preventDefaultHandler(e);
                     setShouldHighlight(true);
@@ -34,35 +42,26 @@ const FileUpload = () => {
                     preventDefaultHandler(e);
                     setShouldHighlight(false);
                 }}
-                onDrop={(e) => {
-                    preventDefaultHandler(e);
-                    const files = Array.from(e.dataTransfer.files);
-                    setFileList(files);
-                    setShouldHighlight(false);
-                }}
+                onDrop={handleDrop}
             >
                 <div className="flex flex-col items-center">
-                    {!fileList ? (
+                    {!tempFile ? (
                         <>
-                            <CloudArrowUpIcon className="w-10 h-10" />
-                            <span>
+                            <CloudArrowUpIcon className="w-10 h-10 text-violet-500" />
+                            <span className="text-violet-500">
                                 <span>Choose a File</span> or drag it here
                             </span>
                         </>
                     ) : (
                         <>
-                            <p>Files to Upload</p>
-                            {fileList.map((file, i) => {
-                                return <span key={i}>{file.name}</span>;
-                            })}
+                            <p>File to Upload</p>
+                            <span>{tempFile.name}</span>
                             <div className="flex gap-2 mt-2">
-                                <button className="bg-violet-500 text-violet-50 px-2 py-1 rounded-md">
-                                    Upload
-                                </button>
                                 <button
                                     className="border border-violet-500 px-2 py-1 rounded-md"
                                     onClick={() => {
-                                        setFileList(null);
+                                        setTempFile(null);
+                                        setPicture(null)
                                     }}
                                 >
                                     Clear
@@ -77,4 +76,3 @@ const FileUpload = () => {
 };
 
 export default FileUpload;
-

@@ -8,7 +8,7 @@ seq = 32  # length of sequence
 # increasing this will add thicker lines to the decrypted image
 
 
-def generateSequence(bits=3):
+def generateSequence(bits=4):
     # would be better if generate these ourselves instead of using this function
     sequence = np.random.randint(1, bits, size=(seq,))
     return sequence
@@ -59,7 +59,7 @@ def decryptPixel(encrypted_pixel, bit_shift):
     return decrypted_pixel
 
 
-def encryptImage(original_img, secret_img, bits=3):
+def encryptImage(original_img, secret_img, bits=4):
     dimensions = (secret_img.shape[0], secret_img.shape[1])
 
     secret_img = cv2.resize(

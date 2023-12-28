@@ -6,6 +6,7 @@ from algorithms.randomizer import encryptImage, decryptImage
 # from algorithms.decode import multipleBitDecryption
 from utils.helperFunctions import determineImageType, imageToFile, saveImage, createClientFile
 import base64
+import json
 import numpy as np
 from PIL import Image
 import io
@@ -47,7 +48,7 @@ def api_encode():
     encoded_image = multipleBitEncryption(original_image, hidden_image, bits)
 
     # for testing purpose; to be removed
-    saveImage(encoded_image, 'encoded_image.png')
+    # saveImage(encoded_image, 'encoded_image.png')
 
     img_file = createClientFile(encoded_image)
 
@@ -72,17 +73,21 @@ def api_randomAlgo():
 
     # bits is max 8 i.e. max no of bits to be used for encryption
     encrypted_image, encrypted_order, key = encryptImage(
-        original_image, hidden_image, bits=3)
+        original_image, hidden_image, bits=4)
 
     # for testing purpose; to be removed
-    saveImage(encrypted_image, 'encrypted_image.png')
+    # saveImage(encrypted_image, 'encrypted_image.png')
 
     img_file = createClientFile(encrypted_image)
 
     # send back the encrypted image and the encrypted order
     # encrypted order is a json string
 
-    return jsonify({'status': 'success', 'message': 'Image encoded successfully', 'encrypted_image': img_file, 'encrypted_order': encrypted_order, 'key': key})
+    combined_data = {'encrypted_order': encrypted_order, 'key': key}
+    combined_data_string = json.dumps(combined_data)
+    encoded_combined_data = base64.b64encode(combined_data_string.encode()).decode()
+
+    return jsonify({'status': 'success', 'message': 'Image encoded successfully', 'encrypted_image': img_file, 'combined_key': encoded_combined_data})
 
 
 @app.route('/api/randomAlgoDecrypt', methods=['POST'])
@@ -92,18 +97,20 @@ def api_randomAlgoDecrypt():
     if 'encrypted_image' not in request.files:
         return jsonify({'status': 'error', 'message': 'Encrypted Image not uploaded'})
 
-    if 'encrypted_order' not in request.form:
-        return jsonify({'status': 'error', 'message': 'Encrypted Order not uploaded'})
+    if 'combined_key' not in request.form:
+        return jsonify({'status': 'error', 'message': 'Combined Key not uploaded'})
 
-    if 'key' not in request.form:
-        return jsonify({'status': 'error', 'message': 'Key not uploaded'})
+    # Decoding the combined key back to encrypted_order and key
+    encoded_combined_data = request.form['combined_key']
+    decoded_combined_data = base64.b64decode(encoded_combined_data).decode()
+    combined_data = json.loads(decoded_combined_data)
+    encrypted_order = combined_data['encrypted_order']
+    key = combined_data['key']
+
 
     encrypted_image = fileToImage(request.files['encrypted_image'])
-    encrypted_order = request.form['encrypted_order']
-    key = request.form['key']
 
     # convert the encrypted order which is json to bytes
-
     decrypted_img = decryptImage(encrypted_image, encrypted_order, key)
 
     # for testing purpose; to be removed
