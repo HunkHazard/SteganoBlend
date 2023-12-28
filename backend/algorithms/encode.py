@@ -111,11 +111,14 @@ def multiBitTextDecryption(modified_image, bit_shift, stop_character='\0'):
 def keyBasedTextEncoding(original_image, message):
     key = generate_key()
     encrypted_message = encrypt_message(message, key)
+    encrypted_message = encrypted_message.decode()
     modified_image = hide_text_in_image(original_image, encrypted_message)
-    return modified_image, key
+    
+    return modified_image, key.decode()
 
 
-def keyBaseTextDecoding(retrieved_image, key):
+def keyBasedTextDecoding(retrieved_image, key):
     retrieved_data = retrieve_text_from_image(retrieved_image)
-    decrypted_message = decrypt_message(retrieved_data.encode(), key)
+    decrypted_message = decrypt_message(retrieved_data.encode(), key.encode())
     return decrypted_message
+
