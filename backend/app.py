@@ -86,7 +86,8 @@ def api_randomAlgo():
 
     combined_data = {'encrypted_order': encrypted_order, 'key': key}
     combined_data_string = json.dumps(combined_data)
-    encoded_combined_data = base64.b64encode(combined_data_string.encode()).decode()
+    encoded_combined_data = base64.b64encode(
+        combined_data_string.encode()).decode()
 
     return jsonify({'status': 'success', 'message': 'Image encoded successfully', 'encrypted_image': img_file, 'combined_key': encoded_combined_data})
 
@@ -107,7 +108,6 @@ def api_randomAlgoDecrypt():
     combined_data = json.loads(decoded_combined_data)
     encrypted_order = combined_data['encrypted_order']
     key = combined_data['key']
-
 
     encrypted_image = fileToImage(request.files['encrypted_image'])
 
@@ -278,7 +278,7 @@ def pvr_decrypt():
     saveImage(encrypted, 'encrypted.png')
     saveImage(original, 'original.png')
 
-    # decrypt
+    # decrypt (original, name of text file , encrypted image)
     decryptPVD('static/original.png', 'decrypted.txt', 'static/encrypted.png')
 
     # load encrypted
