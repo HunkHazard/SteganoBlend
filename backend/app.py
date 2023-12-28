@@ -264,14 +264,14 @@ def pvr_decrypt():
     print("[HIT] /api/pvr-decrypt")
 
     # getting files
-    if 'encrypted' not in request.files:
+    if 'image' not in request.files:
         return jsonify({'status': 'error', 'message': 'No image uploaded'})
-    encrypted = fileToImage(request.files['encrypted'])
+    encrypted = fileToImage(request.files['image'])
 
     if 'original' not in request.files:
         return jsonify({'status': 'error', 'message': 'No image uploaded'})
     original = fileToImage(request.files['original'])
-    print("Hello")
+
     print(original.shape)
     print(encrypted.shape)
 
@@ -299,7 +299,6 @@ def pvr_decrypt():
     os.remove('static/original.png')
 
     return jsonify({'status': 'success', 'message': 'Image decrypted successfully', 'decrypted_text': decrypted_text})
-
 
 @app.route('/api/metrics', methods=['POST'])
 def metrics():

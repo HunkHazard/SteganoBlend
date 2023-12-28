@@ -12,6 +12,7 @@ const TextInImageDecryption = () => {
     const [Image, setImage] = useState(null);
     const [decryptedText, setDecryptedText] = useState("");
     const [uploadedImage, setUploadedImage] = useState(null);
+    const [Original, setOriginal] = useState(null);
 
 
     const handleTechniqueChange = (e) => {
@@ -39,6 +40,10 @@ const TextInImageDecryption = () => {
             return false;
         }
 
+        if (Technique === 'variable' && Original === null) {
+            return false;
+        }
+
         return true;
     };
 
@@ -53,23 +58,64 @@ const TextInImageDecryption = () => {
         } else if (Technique === 'encryption') {
             formData.append('key', Key);
         }
-
-        try {
-            const response = await fetch('http://localhost:5000/text-image-decrypt', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                setDecryptedText(jsonResponse.decrypted_text);
-                setUploadedImage(URL.createObjectURL(Image));
-            } else {
-                console.error('Failed to decrypt the image', response.status);
-            }
-        } catch (error) {
-            console.error('Error while decrypting the image', error);
+        else if (Technique === 'variable') {
+            formData.append('original', Original)
         }
+        if (Technique === 'multi-bit' || Technique === 'encryption') {
+
+            try {
+                const response = await fetch('http://localhost:5000/text-image-decrypt', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const jsonResponse = await response.json();
+                    setDecryptedText(jsonResponse.decrypted_text);
+                    setUploadedImage(URL.createObjectURL(Image));
+                } else {
+                    console.error('Failed to decrypt the image', response.status);
+                }
+            } catch (error) {
+                console.error('Error while decrypting the image', error);
+            }
+        }
+        else if (Technique === 'variable') {
+            try {
+                const response = await fetch('http://localhost:5000/api/pvr-decrypt', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const jsonResponse = await response.json();
+                    setDecryptedText(jsonResponse.decrypted_text);
+                    setUploadedImage(URL.createObjectURL(Image));
+                } else {
+                    console.error('Failed to decrypt the image', response.status);
+                }
+            } catch (error) {
+                console.error('Error while decrypting the image', error);
+            }
+        }
+        // else if(Technique === 'auto-pick'){
+        //     try {
+        //         const response = await fetch('http://localhost:5000/text-image-decrypt-auto', {
+        //             method: 'POST',
+        //             body: formData,
+        //         });
+
+        //         if (response.ok) {
+        //             const jsonResponse = await response.json();
+        //             setDecryptedText(jsonResponse.decrypted_text);
+        //             setUploadedImage(URL.createObjectURL(Image));
+        //         } else {
+        //             console.error('Failed to decrypt the image', response.status);
+        //         }
+        //     } catch (error) {
+        //         console.error('Error while decrypting the image', error);
+        //     }
+        // }
     };
 
     return (
@@ -145,6 +191,22 @@ const TextInImageDecryption = () => {
                                     </div>
                                 </label>
                             </li>
+
+                            {Technique === 'variable' && (
+
+                                <label className="form-control w-full max-w-xs absolute right-[19rem] bottom-[10rem]">
+                                    <div className="label">
+                                        <span className="label-text">Upload original image</span>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        className="file-input file-input-bordered file-input-error w-full max-w-xs "
+                                        onChange={(e) => setOriginal(e.target.files[0])}
+                                    />
+                                </label>
+
+
+                            )}
                             <li>
                                 <input
                                     type='radio'
