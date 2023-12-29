@@ -56,9 +56,16 @@ const Navbar = () => {
                     <li className="mr-2 hover:text-[#1494ff]">
                         <Link to={"/"} >Home</Link>
                     </li>
-                    <li className="mr-2 hover:text-[#1494ff] ">
-                        <Link >Tools</Link>
+                    <li className="mr-2 hover:text-[#1494ff]">
+                        <details>
+                            <summary>Tools</summary>
+                            <ul className="p-2">
+                                <li><a>Submenu 1</a></li>
+                                <li><a>Submenu 2</a></li>
+                            </ul>
+                        </details>
                     </li>
+
 
                     <li className="mr-2 hover:text-[#1494ff]">
                         <Link >About</Link>

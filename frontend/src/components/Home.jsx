@@ -2,7 +2,10 @@ import React from "react";
 import print from "../assets/print.png";
 import privates from "../assets/privates.png";
 import logo from "../assets/logo.png";
-
+import decIm from "../assets/decrypt-image.png";
+import encIm from "../assets/encrypt-image.png";
+import dectext from "../assets/decrypt-text.png";
+import entext from "../assets/encrypt-text.png";
 const Home = () => {
     return (
         <div className="flex h-full w-screen">
@@ -18,25 +21,34 @@ const Home = () => {
                     Our most famous tools
                 </p>
                 <div className="grid grid-rows-2 grid-flow-col gap-4 mt-4 font-poppins">
-                    <div className="card w-[20rem] bg-base-100 shadow-xl">
-                        <div className="card-body">
-                            <p>Embed Text into image</p>
-                        </div>
+                    <div className="card w-[21rem] bg-base-100 shadow-xl ">
+                        <a href="/text-in-image" className="card-body text-center border-2 rounded-lg hover:border-purple-500 duration-500 cursor-pointer">
+                            <img src={entext} alt="ecrypt text" className="h-[4rem] w-[4rem] mx-auto mb-2" />
+                            <p className="font-semibold text-lg">Encrypt Text into Image</p>
+                        </a>
+
                     </div>
-                    <div className="card w-[20rem] bg-base-100 shadow-xl">
-                        <div className="card-body">
-                            <p>Embed Image into Image</p>
-                        </div>
+
+                    <div className="card w-[21rem] bg-base-100 shadow-xl">
+                        <a href="/image-in-image" className="card-body text-center border-2 rounded-lg hover:border-red-500 duration-500 cursor-pointer">
+                            <img src={encIm} alt="Embed Image" className="h-[4rem] w-[4rem] mx-auto mb-2" />
+                            <p className="font-semibold text-lg">Embed Image into Image</p>
+                        </a>
+
                     </div>
-                    <div className="card w-[20rem] bg-base-100 shadow-xl">
-                        <div className="card-body">
-                            <p>De-embed Text from Image</p>
-                        </div>
+                    <div className="card w-[21rem] bg-base-100 shadow-xl ">
+                        <a href="/text-from-image" className="card-body text-center border-2 rounded-lg hover:border-blue-500 duration-500 cursor-pointer">
+                            <img src={dectext} alt="decrypt text" className="h-[4rem] w-[4rem] mx-auto mb-2" />
+                            <p className="font-semibold text-lg">Decrypt Text from Image</p>
+                        </a>
+
                     </div>
-                    <div className="card w-[20rem] bg-base-100 shadow-xl">
-                        <div className="card-body">
-                            <p>De-embed Image from Image</p>
-                        </div>
+                    <div className=" flex card w-[21rem] bg-base-100 shadow-xl ">
+                        <a href="/image-from-image" className="flex card-body text-center border-2 rounded-lg hover:border-green-500 duration-500 cursor-pointer">
+                            <img src={decIm} alt="decrypt Image" className="h-[4rem] w-[4rem] mx-auto mb-2" />
+                            <p className="font-semibold text-lg">Decrypt Image From Image</p>
+                        </a>
+
                     </div>
 
                 </div>

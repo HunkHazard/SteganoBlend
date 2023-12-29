@@ -12,6 +12,7 @@ const ImageInImageDecryption = () => {
     const [Technique, setTechnique] = useState("");
     const [BitShift, setBitShift] = useState(null);
     const [Key, setKey] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
 
     const handleTechniqueChange = (e) => {
@@ -43,24 +44,52 @@ const ImageInImageDecryption = () => {
 
     const handleDecodeClick = async () => {
         const formData = new FormData();
-        formData.append('image', uploadedImage);
-        formData.append('bits', BitShift);
+        setIsLoading(true);
 
-        try {
-            const response = await fetch('http://localhost:5000/api/decode', {
-                method: 'POST',
-                body: formData,
-            });
+        if (Technique === "multi-bit") {
+            formData.append('image', uploadedImage);
+            formData.append('bits', BitShift);
 
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                setKey(jsonResponse.key);
-                setDecodedImage(jsonResponse.decoded_image);
-            } else {
-                console.error('Failed to decode the image', response.status);
+            try {
+                const response = await fetch('http://localhost:5000/api/decode', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const jsonResponse = await response.json();
+                    setDecodedImage(jsonResponse.decoded_image);
+                    setIsLoading(false);
+                } else {
+                    console.error('Failed to decode the image', response.status);
+                }
+            } catch (error) {
+                console.error('Error while decoding the image', error);
             }
-        } catch (error) {
-            console.error('Error while decoding the image', error);
+
+        }
+        else if (Technique === "encryption") {
+            formData.append('combined_key', Key);
+            formData.append('encrypted_image', uploadedImage);
+
+            try {
+                const response = await fetch('http://localhost:5000/api/randomAlgoDecrypt', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const jsonResponse = await response.json();
+                    setDecodedImage(jsonResponse.decrypted_image);
+                    setIsLoading(false);
+                } else {
+                    console.error('Failed to decode the image', response.status);
+                }
+            } catch (error) {
+                console.error('Error while decoding the image', error);
+            }
+
+
         }
     };
     const handleDownloadClick = () => {
@@ -72,13 +101,13 @@ const ImageInImageDecryption = () => {
 
     return (
         <div className="flex flex-col h-full w-full py-10 px-10 items-center">
-            <h1 className="text-5xl font-bold text-black mt-[2rem] ">Decrypt Image from Image</h1>
+            <h1 className="text-5xl font-bold text-black mt-[2rem] font-poppins ">Decrypt Image from Image</h1>
             {!decodedImage ? (
                 <>
                     <DragDrop setPicture={setUploadedImage} />
 
                     <div className="flex justify-center">
-                        <h1 className="text-2xl font-bold text-black mt-[2rem] mb-[1rem]">Choose the technique adopted for encryption</h1>
+                        <h1 className="text-2xl font-poppins text-black mt-[2rem] mb-[1rem]">Choose the technique adopted for encryption</h1>
                     </div>
                     <ul>
                         <div className="flex justify-center mt-4">
@@ -94,6 +123,7 @@ const ImageInImageDecryption = () => {
                                                 className="hidden peer"
                                                 checked={BitShift === `${number}`}
                                                 onChange={handleBitShiftChange}
+                                                disabled={isLoading}
                                             />
                                             <label
                                                 htmlFor={`bit-shift-${number}`}
@@ -123,6 +153,8 @@ const ImageInImageDecryption = () => {
                                         handleTechniqueChange(e);
                                         setKey("");
                                     }}
+                                    disabled={isLoading}
+
 
                                 />
                                 <label
@@ -137,40 +169,12 @@ const ImageInImageDecryption = () => {
                                     </div>
                                 </label>
                             </li>
-                            <li>
-                                <input
-                                    type='radio'
-                                    id='variable'
-                                    name='radio-10'
-                                    value='variable'
-                                    className='hidden peer'
-                                    required
-                                    onChange={(e) => {
-                                        handleTechniqueChange(e);
-                                        setKey("");
-                                    }}
-                                />
-                                <label
-                                    htmlFor='variable'
-                                    className='inline-flex items-center border-2 border-slate-300 mr-4 justify-between w-[19rem] p-5 text-slate-800 bg-white rounded-lg cursor-pointer peer-checked:border-red-600 peer-checked:text-red-600 hover:text-gray-600 hover:bg-gray-100 '
-                                >
-                                    <div className='flex'>
-                                        <img src={Variable} alt="multi" className="h-8 w-8 inline-block mr-2" />
-                                        <div className='w-full text-lg font-normal mt-0.5 ml-2'>
-                                            Variable Embedding Rate
-                                        </div>
-                                    </div>
-                                </label>
-                            </li>
 
                             {Technique === 'encryption' && (
                                 <div className="key-input mt-4">
-                                    <input type="text" placeholder="Enter Encrytion Key" className="input input-bordered focus:outline-green-600 focus:border-green-600 w-full max-w-xs text-green-600  absolute left-[17rem] bottom-10" onChange={handleKeyChange} />
+                                    <input type="text" placeholder="Enter Encrytion Key" className="input input-bordered focus:outline-green-600 focus:border-green-600 w-full max-w-xs text-green-600  absolute right-[19rem] bottom-[10rem]" onChange={handleKeyChange} disabled={isLoading} />
                                 </div>
                             )}
-
-                        </div>
-                        <div className="flex justify-center mt-10">
                             <li>
                                 <input
                                     type='radio'
@@ -182,6 +186,8 @@ const ImageInImageDecryption = () => {
                                     onChange={
                                         handleTechniqueChange
                                     }
+                                    disabled={isLoading}
+
                                 />
                                 <label
                                     htmlFor='encryption'
@@ -195,32 +201,6 @@ const ImageInImageDecryption = () => {
                                     </div>
                                 </label>
                             </li>
-                            <li>
-                                <input
-                                    type='radio'
-                                    id='auto-pick'
-                                    name='radio-10'
-                                    value='auto-pick'
-                                    className='hidden peer'
-                                    required
-                                    onChange={(e) => {
-                                        handleTechniqueChange(e);
-                                        setKey("");
-                                    }}
-                                />
-                                <label
-                                    htmlFor='auto-pick'
-                                    className='inline-flex items-center border-2 border-slate-300 mr-4 justify-between w-[19rem] p-5 text-slate-800 bg-white rounded-lg cursor-pointer peer-checked:border-purple-600 peer-checked:text-purple-600 hover:text-gray-600 hover:bg-gray-100 '
-                                >
-                                    <div className='flex'>
-                                        <img src={Auto} alt="multi" className="h-8 w-8 inline-block mr-2" />
-                                        <div className='w-full text-lg font-normal mt-0.5 ml-2'>
-                                            Auto-pick
-                                        </div>
-                                    </div>
-                                </label>
-                            </li>
-
                         </div>
                     </ul>
 
@@ -228,15 +208,16 @@ const ImageInImageDecryption = () => {
                         <button
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 absolute right-[3rem] bottom-[2rem]"
                             onClick={handleDecodeClick}
+                            disabled={isLoading}
                         >
-                            Encode Image
+                            {isLoading ? 'Loading...' : 'Decrypt Image'}
                         </button>
                     )}
                 </>
             ) : (
-                <div>
-                    <img src={`data:image/jpeg;base64,${decodedImage}`} alt="Processed" />
-                    <button onClick={handleDownloadClick} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <div className="flex justify-center items-center flex-col h-[40rem]">
+                    <img src={`data:image/jpeg;base64,${decodedImage}`} alt="Processed" className="w-full h-[32rem] border-8 border-[#042249] rounded-md" />
+                    <button onClick={handleDownloadClick} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded absolute right-[3rem] bottom-[3rem]">
                         Download Image
                     </button>
                 </div>

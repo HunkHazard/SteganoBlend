@@ -108,6 +108,7 @@ def api_randomAlgoDecrypt():
     combined_data = json.loads(decoded_combined_data)
     encrypted_order = combined_data['encrypted_order']
     key = combined_data['key']
+    print(key)
 
     encrypted_image = fileToImage(request.files['encrypted_image'])
 

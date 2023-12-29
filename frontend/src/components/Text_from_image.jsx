@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DragDrop from "./DragDrop3";
 import Multi from "../assets/multi.png"
 import Variable from "../assets/variable.png"
@@ -13,6 +13,16 @@ const TextInImageDecryption = () => {
     const [decryptedText, setDecryptedText] = useState("");
     const [uploadedImage, setUploadedImage] = useState(null);
     const [Original, setOriginal] = useState(null);
+    const [isCopied, setIsCopied] = useState(false);
+    const keyInputRef = useRef(null);
+
+    const handleCopyClick = () => {
+        const key = keyInputRef.current.value;
+        navigator.clipboard.writeText(key);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000); // Reset tooltip after 2 seconds
+    };
+
 
 
     const handleTechniqueChange = (e) => {
@@ -98,41 +108,52 @@ const TextInImageDecryption = () => {
                 console.error('Error while decrypting the image', error);
             }
         }
-        // else if(Technique === 'auto-pick'){
-        //     try {
-        //         const response = await fetch('http://localhost:5000/text-image-decrypt-auto', {
-        //             method: 'POST',
-        //             body: formData,
-        //         });
-
-        //         if (response.ok) {
-        //             const jsonResponse = await response.json();
-        //             setDecryptedText(jsonResponse.decrypted_text);
-        //             setUploadedImage(URL.createObjectURL(Image));
-        //         } else {
-        //             console.error('Failed to decrypt the image', response.status);
-        //         }
-        //     } catch (error) {
-        //         console.error('Error while decrypting the image', error);
-        //     }
-        // }
     };
 
     return (
         <div className="flex flex-col h-full w-full py-10 px-10 items-center">
-            <div className="flex justify-center">
-                <h1 className="text-5xl font-bold text-black mt-[2rem]">Decrypt Text from Image</h1>
-            </div>
+
             {uploadedImage && decryptedText ? (
-                <div className="decrypted-info mt-4">
-                    <img src={uploadedImage} alt="Uploaded" className="w-full max-w-xs h-auto" />
-                    <p className="mt-2">Decrypted Text: {decryptedText}</p>
-                </div>
+                <>
+                    <div className="flex justify-center">
+                        <h1 className="text-5xl font-bold text-black mt-[2rem] font-poppins">Image Decrypted Successfully</h1>
+                    </div>
+                    <div className="decrypted-info flex justify-center items-center flex-col h-[40rem]">
+                        <img src={uploadedImage} alt="Uploaded" className="w-full h-[32rem] border-8 border-[#042249] rounded-md" />
+                        <div className="w-full flex justify-start mb-2">
+                            <h1 className="mt-4 font-bold">
+                                Decrypted Text
+                            </h1>
+                        </div>
+                        <div className="flex items-center w-full">
+
+                            <input
+                                ref={keyInputRef}
+                                type="text"
+                                className="input input-bordered w-full"
+                                value={decryptedText}
+                                disabled
+                            />
+                            <button
+                                onClick={handleCopyClick}
+                                className="btn btn-square ml-2"
+                            >
+                                Copy
+                            </button>
+                            {isCopied && (
+                                <span className="tooltip absolute right-[40rem]">Text copied</span>
+                            )}
+                        </div>
+                    </div>
+                </>
             ) : (
                 <>
+                    <div className="flex justify-center">
+                        <h1 className="text-5xl font-bold text-black mt-[2rem] font-poppins">Decrypt Text from Image</h1>
+                    </div>
                     <DragDrop setPicture={setImage} />
                     <div className="flex justify-center">
-                        <h1 className="text-2xl font-bold text-black mt-[2rem] mb-[1rem]">Choose the technique adopted for encryption</h1>
+                        <h1 className="text-2xl font-bold text-black mt-[2rem] mb-[1rem] font-poppins">Choose the technique adopted for encryption</h1>
                     </div>
                     <ul>
                         <div className="flex justify-center mt-4">
@@ -235,7 +256,7 @@ const TextInImageDecryption = () => {
 
                             {Technique === 'encryption' && (
                                 <div className="key-input mt-4">
-                                    <input type="text" placeholder="Enter Encrytion Key" className="input input-bordered focus:outline-green-600 focus:border-green-600 w-full max-w-xs text-green-600  absolute left-[17rem] bottom-10" onChange={handleKeyChange} />
+                                    <input type="text" placeholder="Enter Encrytion Key" className="input input-bordered focus:outline-green-600 focus:border-green-600 w-full max-w-xs text-green-600  absolute left-[27rem] bottom-10" onChange={handleKeyChange} />
                                 </div>
                             )}
 
@@ -265,32 +286,6 @@ const TextInImageDecryption = () => {
                                     </div>
                                 </label>
                             </li>
-                            <li>
-                                <input
-                                    type='radio'
-                                    id='auto-pick'
-                                    name='radio-10'
-                                    value='auto-pick'
-                                    className='hidden peer'
-                                    required
-                                    onChange={(e) => {
-                                        handleTechniqueChange(e);
-                                        setKey("");
-                                    }}
-                                />
-                                <label
-                                    htmlFor='auto-pick'
-                                    className='inline-flex items-center border-2 border-slate-300 mr-4 justify-between w-[19rem] p-5 text-slate-800 bg-white rounded-lg cursor-pointer peer-checked:border-purple-600 peer-checked:text-purple-600 hover:text-gray-600 hover:bg-gray-100 '
-                                >
-                                    <div className='flex'>
-                                        <img src={Auto} alt="multi" className="h-8 w-8 inline-block mr-2" />
-                                        <div className='w-full text-lg font-normal mt-0.5 ml-2'>
-                                            Auto-pick
-                                        </div>
-                                    </div>
-                                </label>
-                            </li>
-
                         </div>
                     </ul>
 
