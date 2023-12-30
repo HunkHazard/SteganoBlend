@@ -12,17 +12,6 @@ PVD_BYTES_TO_BITS = 8
 
 PVD_BYTE_ORDER = 'big'
 
-"""
-This class implements the uitility functionality for reading
-required amount of bits from a given input file for the purpose of encoding.
-
-The constructor reads the entire file to RAM and feeds the required amount
-bits when get_bits() is called.
-
-The class also handles the header information required to identify the 
-PVD library magic sequence, PVD library version and encoded data size.
-"""
-
 
 class file_bits_reader:
 
@@ -107,16 +96,7 @@ class file_bits_reader:
             self.f_obj.close()
 
 
-"""
-This class implements the uitility functionality for writing
-given data bits to a given output file for the purpose of decoding back.
 
-The close file function writes the buffer to the file.
-
-The class also handles the header information required to identify the 
-PVD library magic sequence, PVD library version and encoded data size. And avoids
-writing that data to the output file.
-"""
 
 
 class file_bits_writer:
@@ -183,10 +163,7 @@ class pvd_lib:
     def __init__(self):
         pass
 
-    """ The PVD table that converts the pixel difference to the
-    number of bits that can be used from the Least Significant bits to replace
-    with the secret data. """
-    @staticmethod
+  
     def _pvd_table(p_diff):
         nbits = 0
         if p_diff < 16:
@@ -224,9 +201,7 @@ class pvd_lib:
                     ref_rgb = pixels[height_itr + 1, width_itr + 1]
 
                     """ Iterate through the remaining pixels in the order
-                    [1 2 3]
-                    [4 - 5]
-                    [6 7 8]
+                    
                     """
                     for h_j in range(height_itr, height_itr + 3):
                         for w_i in range(width_itr, width_itr + 3):
@@ -297,9 +272,6 @@ class pvd_lib:
                                     abs(c_rgb[rgb] - ref_rgb[rgb]))
                                 embedded_ds += bits_reqd
 
-                                """ Get the required number of bits corresponding to
-                                the pixel difference from the current pixel and reference pixel from
-                                the input file. """
                                 ret_val = bits_reader.get_bits(bits_reqd)
 
                                 """Replace the LSBs of the pixel with the file data. """
